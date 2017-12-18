@@ -82,18 +82,17 @@ import (
 // Total score == 167
 func Score(game string) int {
 	r := regexp.MustCompile("^([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|\\|([X/0-9\\-]*)$")
-	matches := r.FindAllStringSubmatch(game, -1)
+	matches := r.FindStringSubmatch(game)
 	if matches == nil {
 		return -1
 	}
 
-	results := matches[0]
-	frames := []frame{}
+	var frames []frame
 	for i := 1; i < 11; i++ {
-		frames = append(frames, newFrame(results[i]))
+		frames = append(frames, newFrame(matches[i]))
 	}
 
-	bonusBalls := results[11]
+	bonusBalls := matches[11]
 	var bonusBall1 int64
 	var bonusBall2 int64
 	if len(bonusBalls) > 0 {
