@@ -106,3 +106,9 @@ func TestScoreWithVariedFrameScores(t *testing.T) {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
 	}
 }
+
+func BenchmarkScoreWithVariedFrameScores(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		Score("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+	}
+}

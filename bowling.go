@@ -112,10 +112,6 @@ func Score(game string) int {
 			bonusBall2, _ = strconv.ParseInt(bonusBalls[1:2], 10, 64)
 		}
 	}
-	// fmt.Println(bonusBalls)
-	// fmt.Println(bonusBall1)
-	// fmt.Println(bonusBall2)
-	// fmt.Println("---")
 
 	var score int64
 	for i := 0; i < 10; i++ {
@@ -140,8 +136,6 @@ func Score(game string) int {
 				score += bonusBall1
 			}
 		}
-
-		// fmt.Println(score)
 	}
 
 	return int(score)
