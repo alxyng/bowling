@@ -87,15 +87,13 @@ func Score(game string) int {
 		return -1
 	}
 
-	frames := []frame{}
-
 	results := matches[0]
+	frames := []frame{}
 	for i := 1; i < 11; i++ {
 		frames = append(frames, newFrame(results[i]))
 	}
 
 	bonusBalls := results[11]
-
 	var bonusBall1 int64
 	var bonusBall2 int64
 	if len(bonusBalls) > 0 {
@@ -168,10 +166,7 @@ func newFrame(src string) frame {
 			}
 		}
 
-		j, err := strconv.ParseInt(src[1:2], 10, 64)
-		if err != nil {
-			panic(err)
-		}
+		j, _ := strconv.ParseInt(src[1:2], 10, 64)
 
 		return frame{
 			strike: false,
@@ -181,10 +176,7 @@ func newFrame(src string) frame {
 		}
 	}
 
-	i, err := strconv.ParseInt(src[:1], 10, 64)
-	if err != nil {
-		panic(err)
-	}
+	i, _ := strconv.ParseInt(src[:1], 10, 64)
 
 	if src[1:2] == "-" {
 		return frame{
@@ -204,10 +196,7 @@ func newFrame(src string) frame {
 		}
 	}
 
-	j, err := strconv.ParseInt(src[1:2], 10, 64)
-	if err != nil {
-		panic(err)
-	}
+	j, _ := strconv.ParseInt(src[1:2], 10, 64)
 
 	return frame{
 		strike: false,
