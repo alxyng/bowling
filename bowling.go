@@ -127,6 +127,8 @@ func Score(game string) int {
 					score += frames[i+1].first + frames[i+2].first
 				} else if frames[i+1].strike && i < 9 {
 					score += frames[i+1].first + bonusBall1
+				} else {
+					score += frames[i+1].first + frames[i+1].second
 				}
 			} else if i == 9 {
 				score += bonusBall1 + bonusBall2

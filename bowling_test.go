@@ -97,3 +97,12 @@ func TestScoreWithAllStrikes(t *testing.T) {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
 	}
 }
+
+func TestScoreWithVariedFrameScores(t *testing.T) {
+	s := Score("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+
+	expectedScore := 167
+	if s != expectedScore {
+		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
+	}
+}
