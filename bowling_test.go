@@ -2,51 +2,66 @@ package bowling
 
 import "testing"
 
-func TestScoreGameStringMustContainNineFrameBoundariesAndOneBonusBallBoundary(t *testing.T) {
-	games := []struct {
-		input string
-		valid bool
-	}{
-		{"", false},
-		{"|", false},
-		{"--|--|--|--|--|--|--|--|--||", false},
-		{"--|--|--|--|--|--|--|--|--|--|--||", false},
-		{"--|--|--|--|--|--|--|--|--|--||", true},
-		{"X|X|X|X|X|X|X|X|X|X||XX", true},
+func TestNewGameInputThatDoesNotContainNineFrameBoundariesAndOneBonusBallsBoundaryReturnsANonNilError(t *testing.T) {
+	inputs := []string{
+		"",
+		"|",
+		"--|--|--|--|--|--|--|--|--||",
+		"--|--|--|--|--|--|--|--|--|--|--||",
 	}
 
-	for _, game := range games {
-		_, err := NewGame(game.input)
-		valid := err == nil
-		if valid != game.valid {
-			t.Errorf("incorrect validity for %v, got %v, want %v", game.input, valid, game.valid)
+	for _, input := range inputs {
+		_, err := NewGame(input)
+		if err == nil {
+			t.Errorf("expected an error for %v but got nil", input)
 		}
 	}
 }
 
-func TestScoreGameStringMustContainOnlyValidCharacters(t *testing.T) {
-	games := []struct {
-		input string
-		valid bool
-	}{
-		{"X|X|X|X|X|X|X|X|X|X||XX", true},
-		{"9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||", true},
-		{"5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5", true},
-		{"X|7/|9-|X|-8|8/|-6|X|X|X||81", true},
-		{"X|X|X|X|X|X|X|?|X|X||XX", false},
-		{"X|X|X|+|--|X|X|X|X|X||XX", false},
+func TestNewGameInputThatContainsNineFrameBoundariesAndOneBonusBallsBoundaryReturnsANilError(t *testing.T) {
+	inputs := []string{
+		"--|--|--|--|--|--|--|--|--|--||",
+		"X|X|X|X|X|X|X|X|X|X||XX",
 	}
 
-	for _, game := range games {
-		_, err := NewGame(game.input)
-		valid := err == nil
-		if valid != game.valid {
-			t.Errorf("incorrect validity for %v, got %v, want %v", game.input, valid, game.valid)
+	for _, input := range inputs {
+		_, err := NewGame(input)
+		if err != nil {
+			t.Errorf("expected a nil error for %v but got %v", input, err)
 		}
 	}
 }
 
-func TestScoreGameWithAllMissesReturnsZero(t *testing.T) {
+func TestNewGameInputThatContainsInvalidCharactersReturnsANonNilError(t *testing.T) {
+	inputs := []string{
+		"X|X|X|X|X|X|X|?|X|X||XX",
+		"X|X|X|+|--|X|X|X|X|X||XX",
+	}
+
+	for _, input := range inputs {
+		_, err := NewGame(input)
+		if err == nil {
+			t.Errorf("expected an error for %v but got nil", input)
+		}
+	}
+}
+
+func TestNewGameInputThatContainsValidCharactersReturnsANilError(t *testing.T) {
+	inputs := []string{
+		"9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||",
+		"5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5",
+		"X|7/|9-|X|-8|8/|-6|X|X|X||81",
+	}
+
+	for _, input := range inputs {
+		_, err := NewGame(input)
+		if err != nil {
+			t.Errorf("expected a nil error for %v but got %v", input, err)
+		}
+	}
+}
+
+func TestScoreWithAllMissesReturnsZero(t *testing.T) {
 	game, err := NewGame("--|--|--|--|--|--|--|--|--|--||")
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
@@ -59,7 +74,7 @@ func TestScoreGameWithAllMissesReturnsZero(t *testing.T) {
 	}
 }
 
-func TestScoreGameWithAllOnesReturnsTwenty(t *testing.T) {
+func TestScoreWithAllOnesReturnsTwenty(t *testing.T) {
 	game, err := NewGame("11|11|11|11|11|11|11|11|11|11||")
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
@@ -72,7 +87,7 @@ func TestScoreGameWithAllOnesReturnsTwenty(t *testing.T) {
 	}
 }
 
-func TestScoreGameWithAllMissesAndOnesReturnsTen(t *testing.T) {
+func TestScoreWithAllMissesAndOnesReturnsTen(t *testing.T) {
 	game, err := NewGame("-1|-1|-1|-1|-1|-1|-1|-1|-1|-1||")
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
@@ -85,7 +100,7 @@ func TestScoreGameWithAllMissesAndOnesReturnsTen(t *testing.T) {
 	}
 }
 
-func TestScoreGameWithAllNinesAndMissesReturnsNinety(t *testing.T) {
+func TestScoreWithAllNinesAndMissesReturnsNinety(t *testing.T) {
 	game, err := NewGame("9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||")
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
@@ -98,7 +113,7 @@ func TestScoreGameWithAllNinesAndMissesReturnsNinety(t *testing.T) {
 	}
 }
 
-func TestScoreGameWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
+func TestScoreWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
 	game, err := NewGame("5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5")
 	if err != nil {
 		t.Errorf("expected nil error, got %v", err)
