@@ -1,6 +1,7 @@
 package bowling
 
 import (
+	"errors"
 	"regexp"
 	"strconv"
 )
@@ -80,35 +81,15 @@ import (
 //
 // X|7/|9-|X|-8|8/|-6|X|X|X||81
 // Total score == 167
-func Score(game string) int {
-	r := regexp.MustCompile("^([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|\\|([X/0-9\\-]*)$")
-	matches := r.FindStringSubmatch(game)
-	if matches == nil {
+func Score(src string) int {
+	game, err := newGame(src)
+	if err != nil {
 		return -1
 	}
 
-	var frames []frame
-	for i := 1; i < 11; i++ {
-		frames = append(frames, newFrame(matches[i]))
-	}
-
-	bonusBalls := matches[11]
-	var bonusBall1 int64
-	var bonusBall2 int64
-	if len(bonusBalls) > 0 {
-		if bonusBalls[:1] == "X" {
-			bonusBall1 = 10
-		} else {
-			bonusBall1, _ = strconv.ParseInt(bonusBalls[:1], 10, 64)
-		}
-	}
-	if len(bonusBalls) > 1 {
-		if bonusBalls[1:2] == "X" {
-			bonusBall2 = 10
-		} else {
-			bonusBall2, _ = strconv.ParseInt(bonusBalls[1:2], 10, 64)
-		}
-	}
+	frames := game.frames
+	bonusBall1 := game.bonusBall1
+	bonusBall2 := game.bonusBall2
 
 	var score int64
 	for i := 0; i < 10; i++ {
@@ -136,6 +117,49 @@ func Score(game string) int {
 	}
 
 	return int(score)
+}
+
+type game struct {
+	frames     []frame
+	bonusBall1 int64
+	bonusBall2 int64
+}
+
+func newGame(src string) (game, error) {
+	r := regexp.MustCompile("^([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|\\|([X/0-9\\-]*)$")
+	matches := r.FindStringSubmatch(src)
+	if matches == nil {
+		return game{}, errors.New("bad input string")
+	}
+
+	var frames []frame
+	for i := 1; i < 11; i++ {
+		frames = append(frames, newFrame(matches[i]))
+	}
+
+	bonusBalls := matches[11]
+	var bonusBall1 int64
+	var bonusBall2 int64
+	if len(bonusBalls) > 0 {
+		if bonusBalls[:1] == "X" {
+			bonusBall1 = 10
+		} else {
+			bonusBall1, _ = strconv.ParseInt(bonusBalls[:1], 10, 64)
+		}
+	}
+	if len(bonusBalls) > 1 {
+		if bonusBalls[1:2] == "X" {
+			bonusBall2 = 10
+		} else {
+			bonusBall2, _ = strconv.ParseInt(bonusBalls[1:2], 10, 64)
+		}
+	}
+
+	return game{
+		frames:     frames,
+		bonusBall1: bonusBall1,
+		bonusBall2: bonusBall2,
+	}, nil
 }
 
 type frame struct {
