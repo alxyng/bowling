@@ -6,10 +6,9 @@ import (
 	"strconv"
 )
 
-// Score scores a game of Ten-Pin Bowling.
-//
-// An implementation of the "Bowling Game" problem from cyber-dojo.org. The
-// problem has the following description:
+// Game represents a game of Ten-Pin Bowling. It is an
+// implementation of the "Bowling Game" problem from
+// cyber-dojo.org. The problem has the following description:
 //
 // Write a program to score a game of Ten-Pin Bowling.
 //
@@ -81,55 +80,18 @@ import (
 //
 // X|7/|9-|X|-8|8/|-6|X|X|X||81
 // Total score == 167
-func Score(src string) int {
-	game, err := newGame(src)
-	if err != nil {
-		return -1
-	}
-
-	frames := game.frames
-	bonusBall1 := game.bonusBall1
-	bonusBall2 := game.bonusBall2
-
-	var score int64
-	for i := 0; i < 10; i++ {
-		score += frames[i].first + frames[i].second
-
-		if frames[i].strike {
-			if i < 9 {
-				if frames[i+1].strike && i < 8 {
-					score += frames[i+1].first + frames[i+2].first
-				} else if frames[i+1].strike && i < 9 {
-					score += frames[i+1].first + bonusBall1
-				} else {
-					score += frames[i+1].first + frames[i+1].second
-				}
-			} else if i == 9 {
-				score += bonusBall1 + bonusBall2
-			}
-		} else if frames[i].spare {
-			if i < 9 {
-				score += frames[i+1].first
-			} else if i == 9 {
-				score += bonusBall1
-			}
-		}
-	}
-
-	return int(score)
-}
-
-type game struct {
+type Game struct {
 	frames     []frame
 	bonusBall1 int64
 	bonusBall2 int64
 }
 
-func newGame(src string) (game, error) {
+// NewGame creates a game that represents a game of Ten-Pin Bowling
+func NewGame(input string) (Game, error) {
 	r := regexp.MustCompile("^([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|\\|([X/0-9\\-]*)$")
-	matches := r.FindStringSubmatch(src)
+	matches := r.FindStringSubmatch(input)
 	if matches == nil {
-		return game{}, errors.New("bad input string")
+		return Game{}, errors.New("bad input string")
 	}
 
 	var frames []frame
@@ -155,11 +117,42 @@ func newGame(src string) (game, error) {
 		}
 	}
 
-	return game{
+	return Game{
 		frames:     frames,
 		bonusBall1: bonusBall1,
 		bonusBall2: bonusBall2,
 	}, nil
+}
+
+// Score scores a game of Ten-Pin bowling
+func (g Game) Score() int {
+	var score int64
+
+	for i := 0; i < 10; i++ {
+		score += g.frames[i].first + g.frames[i].second
+
+		if g.frames[i].strike {
+			if i < 9 {
+				if g.frames[i+1].strike && i < 8 {
+					score += g.frames[i+1].first + g.frames[i+2].first
+				} else if g.frames[i+1].strike && i < 9 {
+					score += g.frames[i+1].first + g.bonusBall1
+				} else {
+					score += g.frames[i+1].first + g.frames[i+1].second
+				}
+			} else if i == 9 {
+				score += g.bonusBall1 + g.bonusBall2
+			}
+		} else if g.frames[i].spare {
+			if i < 9 {
+				score += g.frames[i+1].first
+			} else if i == 9 {
+				score += g.bonusBall1
+			}
+		}
+	}
+
+	return int(score)
 }
 
 type frame struct {

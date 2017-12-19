@@ -4,7 +4,7 @@ import "testing"
 
 func TestScoreGameStringMustContainNineFrameBoundariesAndOneBonusBallBoundary(t *testing.T) {
 	games := []struct {
-		game  string
+		input string
 		valid bool
 	}{
 		{"", false},
@@ -16,16 +16,17 @@ func TestScoreGameStringMustContainNineFrameBoundariesAndOneBonusBallBoundary(t 
 	}
 
 	for _, game := range games {
-		valid := Score(game.game) >= 0
+		_, err := NewGame(game.input)
+		valid := err == nil
 		if valid != game.valid {
-			t.Errorf("incorrect validity for %v, got %v, want %v", game.game, valid, game.valid)
+			t.Errorf("incorrect validity for %v, got %v, want %v", game.input, valid, game.valid)
 		}
 	}
 }
 
 func TestScoreGameStringMustContainOnlyValidCharacters(t *testing.T) {
 	games := []struct {
-		game  string
+		input string
 		valid bool
 	}{
 		{"X|X|X|X|X|X|X|X|X|X||XX", true},
@@ -37,16 +38,21 @@ func TestScoreGameStringMustContainOnlyValidCharacters(t *testing.T) {
 	}
 
 	for _, game := range games {
-		valid := Score(game.game) >= 0
+		_, err := NewGame(game.input)
+		valid := err == nil
 		if valid != game.valid {
-			t.Errorf("incorrect validity for %v, got %v, want %v", game.game, valid, game.valid)
+			t.Errorf("incorrect validity for %v, got %v, want %v", game.input, valid, game.valid)
 		}
 	}
 }
 
 func TestScoreGameWithAllMissesReturnsZero(t *testing.T) {
-	s := Score("--|--|--|--|--|--|--|--|--|--||")
+	game, err := NewGame("--|--|--|--|--|--|--|--|--|--||")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 0
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -54,8 +60,12 @@ func TestScoreGameWithAllMissesReturnsZero(t *testing.T) {
 }
 
 func TestScoreGameWithAllOnesReturnsTwenty(t *testing.T) {
-	s := Score("11|11|11|11|11|11|11|11|11|11||")
+	game, err := NewGame("11|11|11|11|11|11|11|11|11|11||")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 20
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -63,8 +73,12 @@ func TestScoreGameWithAllOnesReturnsTwenty(t *testing.T) {
 }
 
 func TestScoreGameWithAllMissesAndOnesReturnsTen(t *testing.T) {
-	s := Score("-1|-1|-1|-1|-1|-1|-1|-1|-1|-1||")
+	game, err := NewGame("-1|-1|-1|-1|-1|-1|-1|-1|-1|-1||")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 10
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -72,8 +86,12 @@ func TestScoreGameWithAllMissesAndOnesReturnsTen(t *testing.T) {
 }
 
 func TestScoreGameWithAllNinesAndMissesReturnsNinety(t *testing.T) {
-	s := Score("9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||")
+	game, err := NewGame("9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 90
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -81,8 +99,12 @@ func TestScoreGameWithAllNinesAndMissesReturnsNinety(t *testing.T) {
 }
 
 func TestScoreGameWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
-	s := Score("5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5")
+	game, err := NewGame("5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 150
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -90,8 +112,12 @@ func TestScoreGameWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
 }
 
 func TestScoreWithAllStrikes(t *testing.T) {
-	s := Score("X|X|X|X|X|X|X|X|X|X||XX")
+	game, err := NewGame("X|X|X|X|X|X|X|X|X|X||XX")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 300
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
@@ -99,16 +125,33 @@ func TestScoreWithAllStrikes(t *testing.T) {
 }
 
 func TestScoreWithVariedFrameScores(t *testing.T) {
-	s := Score("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+	game, err := NewGame("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+	if err != nil {
+		t.Errorf("expected nil error, got %v", err)
+	}
 
+	s := game.Score()
 	expectedScore := 167
 	if s != expectedScore {
 		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
 	}
 }
 
-func BenchmarkScoreWithVariedFrameScores(b *testing.B) {
+func BenchmarkNewGameWithVariedFrameScores(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Score("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+		NewGame("X|7/|9-|X|-8|8/|-6|X|X|X||81")
 	}
+}
+
+var score int
+
+func BenchmarkScoreWithVariedFrameScores(b *testing.B) {
+	game, _ := NewGame("X|7/|9-|X|-8|8/|-6|X|X|X||81")
+	var s int
+
+	for n := 0; n < b.N; n++ {
+		s = game.Score()
+	}
+
+	score = s
 }
