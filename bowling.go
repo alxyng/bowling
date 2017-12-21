@@ -1,9 +1,9 @@
 package bowling
 
 import (
-	"errors"
-	"regexp"
+	"fmt"
 	"strconv"
+	"strings"
 )
 
 // Game represents a game of Ten-Pin Bowling. It is an
@@ -88,32 +88,42 @@ type Game struct {
 
 // NewGame creates a game that represents a game of Ten-Pin Bowling
 func NewGame(input string) (Game, error) {
-	r := regexp.MustCompile("^([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|([X/0-9\\-]+)\\|\\|([X/0-9\\-]*)$")
-	matches := r.FindStringSubmatch(input)
-	if matches == nil {
-		return Game{}, errors.New("bad input string")
+	parts := strings.Split(input, "||")
+	if len(parts) != 2 {
+		return Game{}, fmt.Errorf("bad input string: %v", input)
+	}
+
+	framesInput := parts[0]
+	bonusBallsInput := parts[1]
+
+	frameParts := strings.Split(framesInput, "|")
+	if len(frameParts) != 10 {
+		return Game{}, fmt.Errorf("bad input string: %v", input)
 	}
 
 	var frames []frame
-	for i := 1; i < 11; i++ {
-		frames = append(frames, newFrame(matches[i]))
+	for i := 0; i < 10; i++ {
+		f, err := newFrame(frameParts[i])
+		if err != nil {
+			return Game{}, fmt.Errorf("error creating frame %v: %v", i, err)
+		}
+		frames = append(frames, f)
 	}
 
-	bonusBalls := matches[11]
 	var bonusBall1 int64
 	var bonusBall2 int64
-	if len(bonusBalls) > 0 {
-		if bonusBalls[:1] == "X" {
+	if len(bonusBallsInput) > 0 {
+		if bonusBallsInput[:1] == "X" {
 			bonusBall1 = 10
 		} else {
-			bonusBall1, _ = strconv.ParseInt(bonusBalls[:1], 10, 64)
+			bonusBall1, _ = strconv.ParseInt(bonusBallsInput[:1], 10, 64)
 		}
 	}
-	if len(bonusBalls) > 1 {
-		if bonusBalls[1:2] == "X" {
+	if len(bonusBallsInput) > 1 {
+		if bonusBallsInput[1:2] == "X" {
 			bonusBall2 = 10
 		} else {
-			bonusBall2, _ = strconv.ParseInt(bonusBalls[1:2], 10, 64)
+			bonusBall2, _ = strconv.ParseInt(bonusBallsInput[1:2], 10, 64)
 		}
 	}
 
@@ -162,14 +172,18 @@ type frame struct {
 	second int64
 }
 
-func newFrame(src string) frame {
+func newFrame(src string) (frame, error) {
+	if len(src) < 1 || len(src) > 2 {
+		return frame{}, fmt.Errorf("bad src string: %v", src)
+	}
+
 	if src == "X" {
 		return frame{
 			strike: true,
 			spare:  false,
 			first:  10,
 			second: 0,
-		}
+		}, nil
 	}
 
 	if src[:1] == "-" {
@@ -179,20 +193,26 @@ func newFrame(src string) frame {
 				spare:  false,
 				first:  0,
 				second: 0,
-			}
+			}, nil
 		}
 
-		j, _ := strconv.ParseInt(src[1:2], 10, 64)
+		j, err := strconv.ParseInt(src[1:2], 10, 64)
+		if err != nil {
+			return frame{}, fmt.Errorf("bad src string: %v", src)
+		}
 
 		return frame{
 			strike: false,
 			spare:  false,
 			first:  0,
 			second: j,
-		}
+		}, nil
 	}
 
-	i, _ := strconv.ParseInt(src[:1], 10, 64)
+	i, err := strconv.ParseInt(src[:1], 10, 64)
+	if err != nil {
+		return frame{}, fmt.Errorf("bad src string: %v", src)
+	}
 
 	if src[1:2] == "-" {
 		return frame{
@@ -200,7 +220,7 @@ func newFrame(src string) frame {
 			spare:  false,
 			first:  i,
 			second: 0,
-		}
+		}, nil
 	}
 
 	if src[1:2] == "/" {
@@ -209,15 +229,18 @@ func newFrame(src string) frame {
 			spare:  true,
 			first:  i,
 			second: 10 - i,
-		}
+		}, nil
 	}
 
-	j, _ := strconv.ParseInt(src[1:2], 10, 64)
+	j, err := strconv.ParseInt(src[1:2], 10, 64)
+	if err != nil {
+		return frame{}, fmt.Errorf("bad src string: %v", src)
+	}
 
 	return frame{
 		strike: false,
 		spare:  false,
 		first:  i,
 		second: j,
-	}
+	}, nil
 }

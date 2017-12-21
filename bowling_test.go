@@ -34,8 +34,12 @@ func TestNewGameInputThatContainsNineFrameBoundariesAndOneBonusBallsBoundaryRetu
 
 func TestNewGameInputThatContainsInvalidCharactersReturnsANonNilError(t *testing.T) {
 	inputs := []string{
-		"X|X|X|X|X|X|X|?|X|X||XX",
-		"X|X|X|+|--|X|X|X|X|X||XX",
+		"X|X|X|X|?|X|X|X|X|X||XX",
+		"X|X|X|X||X|X|X|X|X||XX",
+		"X|X|X|X|---|X|X|X|X|X||XX",
+		"X|X|X|X|+|X|X|X|X|X||XX",
+		"X|X|X|X|-.|X|X|X|X|X||XX",
+		"X|X|X|X|1.|X|X|X|X|X||XX",
 	}
 
 	for _, input := range inputs {
