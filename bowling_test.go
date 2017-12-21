@@ -40,6 +40,8 @@ func TestNewGameInputThatContainsInvalidCharactersReturnsANonNilError(t *testing
 		"X|X|X|X|+|X|X|X|X|X||XX",
 		"X|X|X|X|-.|X|X|X|X|X||XX",
 		"X|X|X|X|1.|X|X|X|X|X||XX",
+		"X|X|X|X|X|X|X|X|X|X||?",
+		"X|X|X|X|X|X|X|X|X|X||X?",
 	}
 
 	for _, input := range inputs {
@@ -68,7 +70,7 @@ func TestNewGameInputThatContainsValidCharactersReturnsANilError(t *testing.T) {
 func TestScoreWithAllMissesReturnsZero(t *testing.T) {
 	game, err := NewGame("--|--|--|--|--|--|--|--|--|--||")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -81,7 +83,7 @@ func TestScoreWithAllMissesReturnsZero(t *testing.T) {
 func TestScoreWithAllOnesReturnsTwenty(t *testing.T) {
 	game, err := NewGame("11|11|11|11|11|11|11|11|11|11||")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -94,7 +96,7 @@ func TestScoreWithAllOnesReturnsTwenty(t *testing.T) {
 func TestScoreWithAllMissesAndOnesReturnsTen(t *testing.T) {
 	game, err := NewGame("-1|-1|-1|-1|-1|-1|-1|-1|-1|-1||")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -107,7 +109,7 @@ func TestScoreWithAllMissesAndOnesReturnsTen(t *testing.T) {
 func TestScoreWithAllNinesAndMissesReturnsNinety(t *testing.T) {
 	game, err := NewGame("9-|9-|9-|9-|9-|9-|9-|9-|9-|9-||")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -120,7 +122,7 @@ func TestScoreWithAllNinesAndMissesReturnsNinety(t *testing.T) {
 func TestScoreWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
 	game, err := NewGame("5/|5/|5/|5/|5/|5/|5/|5/|5/|5/||5")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -133,7 +135,7 @@ func TestScoreWithAllFivesAndSparesReturnsOneHundredAndFifty(t *testing.T) {
 func TestScoreWithAllStrikes(t *testing.T) {
 	game, err := NewGame("X|X|X|X|X|X|X|X|X|X||XX")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()
@@ -143,10 +145,23 @@ func TestScoreWithAllStrikes(t *testing.T) {
 	}
 }
 
+func TestScoreWithAllStrikesButMissingBothBonusBalls(t *testing.T) {
+	game, err := NewGame("X|X|X|X|X|X|X|X|X|X||--")
+	if err != nil {
+		t.Fatalf("expected nil error, got %v", err)
+	}
+
+	s := game.Score()
+	expectedScore := 270
+	if s != expectedScore {
+		t.Errorf("incorrect score, got %v, want %v", s, expectedScore)
+	}
+}
+
 func TestScoreWithVariedFrameScores(t *testing.T) {
 	game, err := NewGame("X|7/|9-|X|-8|8/|-6|X|X|X||81")
 	if err != nil {
-		t.Errorf("expected nil error, got %v", err)
+		t.Fatalf("expected nil error, got %v", err)
 	}
 
 	s := game.Score()

@@ -113,18 +113,18 @@ func NewGame(input string) (Game, error) {
 	var bonusBall1 int64
 	var bonusBall2 int64
 	if len(bonusBallsInput) > 0 {
-		if bonusBallsInput[:1] == "X" {
-			bonusBall1 = 10
-		} else {
-			bonusBall1, _ = strconv.ParseInt(bonusBallsInput[:1], 10, 64)
+		ball, err := parseBonusBall(bonusBallsInput[:1])
+		if err != nil {
+			return Game{}, fmt.Errorf("error parsing bonus ball: %v", err)
 		}
+		bonusBall1 = ball
 	}
 	if len(bonusBallsInput) > 1 {
-		if bonusBallsInput[1:2] == "X" {
-			bonusBall2 = 10
-		} else {
-			bonusBall2, _ = strconv.ParseInt(bonusBallsInput[1:2], 10, 64)
+		ball, err := parseBonusBall(bonusBallsInput[1:2])
+		if err != nil {
+			return Game{}, fmt.Errorf("error parsing bonus ball: %v", err)
 		}
+		bonusBall2 = ball
 	}
 
 	return Game{
@@ -163,6 +163,23 @@ func (g Game) Score() int {
 	}
 
 	return int(score)
+}
+
+func parseBonusBall(input string) (int64, error) {
+	if input == "X" {
+		return 10, nil
+	}
+
+	if input == "-" {
+		return 0, nil
+	}
+
+	bonusBall, err := strconv.ParseInt(input, 10, 64)
+	if err != nil {
+		return 0, fmt.Errorf("bad input string: %v", input)
+	}
+
+	return bonusBall, nil
 }
 
 type frame struct {
